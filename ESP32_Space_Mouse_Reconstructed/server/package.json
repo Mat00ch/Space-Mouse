@@ -1,0 +1,8 @@
+{
+  "name": "esp32-space-mouse-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reconstructed ESP32 Space Mouse telemetry server",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.21.2", "ws": "^8.18.0" }
+}

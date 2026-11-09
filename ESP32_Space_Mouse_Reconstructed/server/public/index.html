@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 Space Mouse Dashboard</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 720px; margin: 50px auto; padding: 0 20px; color: #e8eef7; background: #101723; }
+    .panel { border: 1px solid #334155; background: #1b2534; border-radius: 14px; padding: 24px; }
+    pre { white-space: pre-wrap; font-size: 1.15rem; }
+    button { background: #60a5fa; border: 0; border-radius: 8px; padding: 12px 18px; font: inherit; cursor: pointer; }
+    #status { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 Space Mouse</h1>
+  <div class="panel">
+    <p id="status">Connecting...</p>
+    <pre id="output">Waiting for telemetry...</pre>
+    <button id="recalibrate" disabled>Recalibrate MPU6050</button>
+    <p>Set the device down and keep it motionless during recalibration.</p>
+  </div>
+  <script>
+    const output = document.querySelector('#output');
+    const status = document.querySelector('#status');
+    const button = document.querySelector('#recalibrate');
+    let socket;
+    function connect() {
+      socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`);
+      socket.addEventListener('open', () => { status.textContent = 'Connected'; button.disabled = false; });
+      socket.addEventListener('close', () => { status.textContent = 'Disconnected; reconnecting...'; button.disabled = true; setTimeout(connect, 2000); });
+      socket.addEventListener('message', (event) => {
+        if (event.data !== 'RECALIBRATE') output.textContent = event.data;
+      });
+    }
+    button.addEventListener('click', () => {
+      if (socket?.readyState === WebSocket.OPEN) socket.send('RECALIBRATE');
+    });
+    connect();
+  </script>
+</body>
+</html>
